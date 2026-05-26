@@ -1,0 +1,11 @@
+node_modules
+.next
+out
+build
+coverage
+dist
+src/generated/prisma
+package-lock.json
+.env
+.env.*
+!.env.example

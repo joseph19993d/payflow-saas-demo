@@ -1,0 +1,114 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id           String   @id @default(uuid())
+  name         String
+  email        String   @unique
+  passwordHash String
+  role         UserRole @default(USER)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  payments      Payment[]
+  subscriptions Subscription[]
+}
+
+model Plan {
+  id          String   @id @default(uuid())
+  slug        String   @unique
+  name        String
+  description String
+  priceCents  Int
+  currency    String   @default("BRL")
+  features    String[]
+  isActive    Boolean  @default(true)
+  sortOrder   Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  payments      Payment[]
+  subscriptions Subscription[]
+}
+
+model Payment {
+  id                         String        @id @default(uuid())
+  userId                     String
+  planId                     String
+  mercadoPagoPaymentId       String?       @unique
+  mercadoPagoPreferenceId    String?
+  mercadoPagoCheckoutUrl     String?
+  mercadoPagoSandboxInitUrl  String?
+  status                     PaymentStatus @default(PENDING)
+  amountCents                Int
+  currency                   String        @default("BRL")
+  rawPayload                 Json?
+  createdAt                  DateTime      @default(now())
+  updatedAt                  DateTime      @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  plan Plan @relation(fields: [planId], references: [id])
+
+  @@index([userId, createdAt])
+  @@index([planId])
+  @@index([mercadoPagoPreferenceId])
+}
+
+model Subscription {
+  id        String             @id @default(uuid())
+  userId    String
+  planId    String
+  status    SubscriptionStatus @default(INACTIVE)
+  startsAt  DateTime?
+  endsAt    DateTime?
+  createdAt DateTime           @default(now())
+  updatedAt DateTime           @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  plan Plan @relation(fields: [planId], references: [id])
+
+  @@unique([userId])
+  @@index([planId])
+}
+
+model WebhookEvent {
+  id              String   @id @default(uuid())
+  provider        String
+  externalEventId String   @unique
+  eventType       String?
+  processed       Boolean  @default(false)
+  processedAt     DateTime?
+  error           String?
+  payload         Json
+  createdAt       DateTime @default(now())
+
+  @@index([provider, eventType])
+}
+
+enum UserRole {
+  USER
+  ADMIN
+}
+
+enum PaymentStatus {
+  PENDING
+  IN_PROCESS
+  APPROVED
+  REJECTED
+  CANCELLED
+  REFUNDED
+  UNKNOWN
+}
+
+enum SubscriptionStatus {
+  ACTIVE
+  INACTIVE
+  CANCELLED
+  EXPIRED
+}
