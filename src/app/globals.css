@@ -1,13 +1,90 @@
 @import "tailwindcss";
 
 :root {
-  --background: #f8fafc;
-  --foreground: #0f172a;
+  --background: #f6f8fb;
+  --foreground: #0b1020;
+
+  --payflow-primary-100: #b2ebf2;
+  --payflow-primary-200: #80deea;
+  --payflow-primary-300: #4dd0e1;
+  --payflow-primary-400: #26c6da;
+  --payflow-primary-500: #00bcd4;
+  --payflow-primary-600: #00acc1;
+  --payflow-primary-700: #0097a7;
+  --payflow-primary-800: #00838f;
+  --payflow-primary-900: #006064;
+
+  --payflow-secondary-100: #e1d5ff;
+  --payflow-secondary-200: #b39dff;
+  --payflow-secondary-300: #9575ff;
+  --payflow-secondary-400: #7c4dff;
+  --payflow-secondary-500: #6a3de8;
+  --payflow-secondary-600: #5e35d1;
+  --payflow-secondary-700: #512da8;
+  --payflow-secondary-800: #4527a0;
+
+  --payflow-accent-light: #ff6e9f;
+  --payflow-accent-default: #ff4081;
+  --payflow-accent-dark: #e91e63;
+
+  --payflow-success: #4caf50;
+  --payflow-warning: #ff9800;
+  --payflow-error: #f44336;
+  --payflow-info: #2196f3;
+
+  --payflow-text-primary: #1a1a1a;
+  --payflow-text-secondary: #4a4a4a;
+  --payflow-text-disabled: #9e9e9e;
+  --payflow-text-hint: #bdbdbd;
+
+  --payflow-background-primary: #ffffff;
+  --payflow-background-secondary: #f5f5f5;
+  --payflow-background-tertiary: #eeeeee;
+  --payflow-background-dark: #212121;
+
+  --payflow-border-light: #e0e0e0;
+  --payflow-border-medium: #bdbdbd;
+  --payflow-border-divider: #eeeeee;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --color-payflow-primary-100: var(--payflow-primary-100);
+  --color-payflow-primary-200: var(--payflow-primary-200);
+  --color-payflow-primary-300: var(--payflow-primary-300);
+  --color-payflow-primary-400: var(--payflow-primary-400);
+  --color-payflow-primary-500: var(--payflow-primary-500);
+  --color-payflow-primary-600: var(--payflow-primary-600);
+  --color-payflow-primary-700: var(--payflow-primary-700);
+  --color-payflow-primary-800: var(--payflow-primary-800);
+  --color-payflow-primary-900: var(--payflow-primary-900);
+  --color-payflow-secondary-100: var(--payflow-secondary-100);
+  --color-payflow-secondary-200: var(--payflow-secondary-200);
+  --color-payflow-secondary-300: var(--payflow-secondary-300);
+  --color-payflow-secondary-400: var(--payflow-secondary-400);
+  --color-payflow-secondary-500: var(--payflow-secondary-500);
+  --color-payflow-secondary-600: var(--payflow-secondary-600);
+  --color-payflow-secondary-700: var(--payflow-secondary-700);
+  --color-payflow-secondary-800: var(--payflow-secondary-800);
+  --color-payflow-accent-light: var(--payflow-accent-light);
+  --color-payflow-accent-default: var(--payflow-accent-default);
+  --color-payflow-accent-dark: var(--payflow-accent-dark);
+  --color-payflow-success: var(--payflow-success);
+  --color-payflow-warning: var(--payflow-warning);
+  --color-payflow-error: var(--payflow-error);
+  --color-payflow-info: var(--payflow-info);
+  --color-payflow-text-primary: var(--payflow-text-primary);
+  --color-payflow-text-secondary: var(--payflow-text-secondary);
+  --color-payflow-text-disabled: var(--payflow-text-disabled);
+  --color-payflow-text-hint: var(--payflow-text-hint);
+  --color-payflow-background-primary: var(--payflow-background-primary);
+  --color-payflow-background-secondary: var(--payflow-background-secondary);
+  --color-payflow-background-tertiary: var(--payflow-background-tertiary);
+  --color-payflow-background-dark: var(--payflow-background-dark);
+  --color-payflow-border-light: var(--payflow-border-light);
+  --color-payflow-border-medium: var(--payflow-border-medium);
+  --color-payflow-border-divider: var(--payflow-border-divider);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
@@ -16,6 +93,11 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: var(--font-geist-sans), Arial, Helvetica, sans-serif;
+  overflow-x: hidden;
+}
+
+a {
+  text-underline-offset: 4px;
 }
 
 button,
@@ -34,4 +116,9 @@ button:disabled {
 ::selection {
   background: #bfdbfe;
   color: #0f172a;
+}
+
+:focus-visible {
+  outline: 3px solid #bfdbfe;
+  outline-offset: 2px;
 }

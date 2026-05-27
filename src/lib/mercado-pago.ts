@@ -9,6 +9,8 @@ type SignatureParts = {
   v1: string;
 };
 
+const WEBHOOK_TIMESTAMP_TOLERANCE_MS = 10 * 60 * 1000;
+
 let mercadoPagoConfig: MercadoPagoConfig | null = null;
 
 export function getMercadoPagoConfig() {
@@ -46,6 +48,24 @@ function parseSignatureHeader(signature: string | null): SignatureParts | null {
   };
 }
 
+function isWebhookTimestampWithinTolerance(timestamp: string) {
+  if (!/^\d+$/.test(timestamp)) {
+    return false;
+  }
+
+  const parsedTimestamp = Number(timestamp);
+
+  if (!Number.isSafeInteger(parsedTimestamp)) {
+    return false;
+  }
+
+  const timestampMs =
+    parsedTimestamp < 1_000_000_000_000 ? parsedTimestamp * 1000 : parsedTimestamp;
+  const diffMs = Math.abs(Date.now() - timestampMs);
+
+  return diffMs <= WEBHOOK_TIMESTAMP_TOLERANCE_MS;
+}
+
 export function validateMercadoPagoSignature(input: {
   dataId: string | null;
   requestId: string | null;
@@ -54,6 +74,10 @@ export function validateMercadoPagoSignature(input: {
   const signatureParts = parseSignatureHeader(input.signature);
 
   if (!input.dataId || !input.requestId || !signatureParts) {
+    return false;
+  }
+
+  if (!isWebhookTimestampWithinTolerance(signatureParts.ts)) {
     return false;
   }
 

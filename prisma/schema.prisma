@@ -38,19 +38,19 @@ model Plan {
 }
 
 model Payment {
-  id                         String        @id @default(uuid())
-  userId                     String
-  planId                     String
-  mercadoPagoPaymentId       String?       @unique
-  mercadoPagoPreferenceId    String?
-  mercadoPagoCheckoutUrl     String?
-  mercadoPagoSandboxInitUrl  String?
-  status                     PaymentStatus @default(PENDING)
-  amountCents                Int
-  currency                   String        @default("BRL")
-  rawPayload                 Json?
-  createdAt                  DateTime      @default(now())
-  updatedAt                  DateTime      @updatedAt
+  id                        String        @id @default(uuid())
+  userId                    String
+  planId                    String
+  mercadoPagoPaymentId      String?       @unique
+  mercadoPagoPreferenceId   String?
+  mercadoPagoCheckoutUrl    String?
+  mercadoPagoSandboxInitUrl String?
+  status                    PaymentStatus @default(PENDING)
+  amountCents               Int
+  currency                  String        @default("BRL")
+  rawPayload                Json?
+  createdAt                 DateTime      @default(now())
+  updatedAt                 DateTime      @updatedAt
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
   plan Plan @relation(fields: [planId], references: [id])
@@ -78,16 +78,17 @@ model Subscription {
 }
 
 model WebhookEvent {
-  id              String   @id @default(uuid())
+  id              String    @id @default(uuid())
   provider        String
-  externalEventId String   @unique
+  externalEventId String
   eventType       String?
-  processed       Boolean  @default(false)
+  processed       Boolean   @default(false)
   processedAt     DateTime?
   error           String?
   payload         Json
-  createdAt       DateTime @default(now())
+  createdAt       DateTime  @default(now())
 
+  @@unique([provider, externalEventId])
   @@index([provider, eventType])
 }
 

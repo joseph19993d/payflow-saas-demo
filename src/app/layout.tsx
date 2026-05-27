@@ -18,7 +18,7 @@ export const metadata: Metadata = {
     template: "%s | PayFlow SaaS Demo",
   },
   description:
-    "Mini SaaS demonstrativo com Next.js, Prisma, PostgreSQL e Mercado Pago Checkout Pro.",
+    "Projeto que eu criei para demonstrar autenticação, planos e pagamentos com Mercado Pago.",
 };
 
 export default function RootLayout({
@@ -28,7 +28,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="pt-BR" className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}>
-      <body className="min-h-full bg-slate-50 text-slate-950">{children}</body>
+      <body className="min-h-full bg-[#f4f7fb] text-[#0b1736]">{children}</body>
     </html>
   );
 }

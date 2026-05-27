@@ -7,6 +7,8 @@ import { prisma } from "@/lib/prisma";
 
 export const runtime = "nodejs";
 
+const MERCADO_PAGO_PROVIDER = "mercadopago";
+
 type WebhookPayload = {
   id?: string | number;
   type?: string;
@@ -34,6 +36,26 @@ function isPaymentEvent(payload: WebhookPayload, queryType: string | null) {
   return queryType === "payment" || payload.type === "payment" || eventType.startsWith("payment.");
 }
 
+function buildWebhookEventKey(input: {
+  payload: WebhookPayload;
+  dataId: string;
+  eventType: string;
+  requestId: string | null;
+}) {
+  const providerEventId = input.payload.id?.toString();
+
+  if (providerEventId) {
+    return `${input.eventType}:${input.dataId}:event:${providerEventId}`;
+  }
+
+  if (input.requestId) {
+    return `${input.eventType}:${input.dataId}:request:${input.requestId}`;
+  }
+
+  // Valid signed requests should include x-request-id; reject if no stable key can be built.
+  return null;
+}
+
 export async function POST(request: NextRequest) {
   const payload = (await request.json().catch(() => ({}))) as WebhookPayload;
   const queryDataId = request.nextUrl.searchParams.get("data.id");
@@ -57,14 +79,23 @@ export async function POST(request: NextRequest) {
   }
 
   const eventType = getEventType(payload);
-  const externalEventId = String(payload.id ?? requestId ?? `${eventType}:${dataId}`);
+  const externalEventId = buildWebhookEventKey({
+    payload,
+    dataId,
+    eventType,
+    requestId,
+  });
+
+  if (!externalEventId) {
+    return apiError("Webhook sem chave de idempotencia.", 422);
+  }
 
   let webhookEvent;
 
   try {
     webhookEvent = await prisma.webhookEvent.create({
       data: {
-        provider: "mercadopago",
+        provider: MERCADO_PAGO_PROVIDER,
         externalEventId,
         eventType,
         payload,

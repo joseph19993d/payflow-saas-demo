@@ -26,7 +26,7 @@ export function CheckoutButton({ planSlug }: CheckoutButtonProps) {
       const data = (await response.json()) as { checkoutUrl?: string; error?: string };
 
       if (response.status === 401) {
-        router.push("/login?next=/pricing");
+        router.push("/login?next=/dashboard");
         return;
       }
 
@@ -37,7 +37,7 @@ export function CheckoutButton({ planSlug }: CheckoutButtonProps) {
 
       window.location.href = data.checkoutUrl;
     } catch {
-      setError("Falha ao conectar com o servidor.");
+      setError("Nao foi possivel iniciar a assinatura.");
     } finally {
       setIsLoading(false);
     }
@@ -49,16 +49,20 @@ export function CheckoutButton({ planSlug }: CheckoutButtonProps) {
         type="button"
         onClick={startCheckout}
         disabled={isLoading}
-        className="inline-flex h-11 w-full items-center justify-center gap-2 rounded-lg bg-blue-600 px-4 text-sm font-semibold text-white transition hover:bg-blue-700 disabled:opacity-70"
+        className="inline-flex h-11 w-full items-center justify-center gap-2 rounded-lg bg-[var(--payflow-primary-800)] px-4 text-sm font-semibold text-white shadow-[0_18px_42px_rgba(0,131,143,0.2)] transition hover:bg-[var(--payflow-primary-900)] focus:outline-none focus:ring-4 focus:ring-[var(--payflow-primary-200)] disabled:opacity-70"
       >
         {isLoading ? (
           <Loader2 className="h-4 w-4 animate-spin" />
         ) : (
           <CreditCard className="h-4 w-4" />
         )}
-        Assinar com Mercado Pago
+        Assinar plano
       </button>
-      {error ? <p className="text-sm text-red-600">{error}</p> : null}
+      {error ? (
+        <p className="rounded-lg border border-[color-mix(in_srgb,var(--payflow-error)_28%,white)] bg-[color-mix(in_srgb,var(--payflow-error)_8%,white)] px-3 py-2 text-sm text-[var(--payflow-error)]">
+          {error}
+        </p>
+      ) : null}
     </div>
   );
 }

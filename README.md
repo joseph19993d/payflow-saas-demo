@@ -1,10 +1,11 @@
 # PayFlow SaaS Demo
 
-Mini SaaS demonstrativo para mostrar um fluxo profissional de pagamento com
-Next.js, TypeScript, PostgreSQL, Prisma e Mercado Pago Checkout Pro.
+Mini SaaS demonstrativo que eu criei para mostrar um fluxo profissional de
+pagamento com Next.js, TypeScript, PostgreSQL, Prisma e Mercado Pago Checkout
+Pro.
 
 O objetivo nao e ser um produto comercial completo. O foco e demonstrar maturidade
-tecnica em um fluxo real de billing: cadastro, login, planos, criacao de checkout,
+tecnica em um fluxo real de planos: cadastro, login, checkout,
 webhook validado, idempotencia, persistencia em banco e ativacao automatica da
 assinatura apos confirmacao do provedor.
 
@@ -22,11 +23,11 @@ assinatura apos confirmacao do provedor.
 
 ## Funcionalidades
 
-- Landing page do produto ficticio.
-- Pagina de precos com planos Free, Pro e Business.
+- Landing page do meu case tecnico.
 - Cadastro e login com email e senha.
-- Area protegida em `/dashboard`.
-- Billing em `/dashboard/billing`.
+- Dashboard protegido com planos Free, Pro e Business.
+- Checkout pago iniciado diretamente pelo dashboard.
+- Retorno do checkout com mensagem centralizada no dashboard.
 - Rota server-side `/api/checkout`.
 - Webhook em `/api/webhooks/mercadopago`.
 - Seed com planos iniciais.
@@ -45,7 +46,6 @@ src/
     checkout/
     dashboard/
     login/
-    pricing/
     register/
   components/
   lib/
@@ -105,7 +105,7 @@ sequenceDiagram
   participant DB as PostgreSQL
 
   MP->>WH: Notificacao com x-signature
-  WH->>WH: Valida HMAC com data.id, x-request-id e ts
+  WH->>WH: Valida HMAC, timingSafeEqual e janela do ts
   WH->>DB: Registra WebhookEvent unico
   WH->>API: Consulta pagamento oficial
   API-->>WH: Retorna status real
@@ -116,11 +116,13 @@ sequenceDiagram
 Implementacoes importantes:
 
 - Validacao de assinatura via `x-signature`.
+- Protecao contra replay por janela de timestamp no `ts`.
 - Uso do header `x-request-id`.
 - Uso de `data.id` da query string na manifest string.
-- Idempotencia por `WebhookEvent.externalEventId`.
+- Idempotencia por `WebhookEvent.provider` + `WebhookEvent.externalEventId`.
 - Consulta ao pagamento no Mercado Pago antes de confiar no payload.
 - Transacao Prisma ao atualizar pagamento e assinatura.
+- Persistencia apenas de payload sanitizado em `Payment.rawPayload`.
 
 Referencias oficiais usadas:
 
@@ -156,13 +158,25 @@ Instale dependencias:
 npm install
 ```
 
-Gere o Prisma Client:
+Copie as variaveis de ambiente:
 
 ```bash
-npm run prisma:generate
+cp .env.example .env
 ```
 
-Suba um PostgreSQL local e aplique as migrations:
+No Windows PowerShell:
+
+```powershell
+Copy-Item .env.example .env
+```
+
+Suba o PostgreSQL com Docker:
+
+```bash
+npm run db:up
+```
+
+Aplique as migrations:
 
 ```bash
 npm run db:migrate
@@ -174,6 +188,12 @@ Cadastre os planos iniciais:
 npm run db:seed
 ```
 
+Gere o Prisma Client, se necessario:
+
+```bash
+npm run prisma:generate
+```
+
 Inicie a aplicacao:
 
 ```bash
@@ -181,6 +201,22 @@ npm run dev
 ```
 
 Acesse `http://localhost:3000`.
+
+Para testar webhooks em desenvolvimento local, exponha a aplicacao com ngrok:
+
+```bash
+ngrok http 3000
+```
+
+Use a URL HTTPS gerada pelo ngrok no Mercado Pago Developers:
+
+```text
+https://sua-url-ngrok/api/webhooks/mercadopago
+```
+
+Depois configure as credenciais de teste e o segredo do webhook no `.env`.
+
+Nunca versione o arquivo `.env`.
 
 ## Rodando com PostgreSQL via Docker
 
@@ -254,16 +290,22 @@ https://sua-url-publica/api/webhooks/mercadopago
 
 7. Copie o segredo de webhook para `MERCADO_PAGO_WEBHOOK_SECRET`.
 8. Crie uma conta, escolha um plano pago e finalize o pagamento em sandbox.
-9. Confira `/dashboard/billing`.
+9. Confira `/dashboard`.
+
+Importante:
+
+- Use credenciais de teste do Mercado Pago durante o desenvolvimento.
+- Configure o webhook no mesmo ambiente das credenciais usadas.
+- O ngrok e apenas uma ponte local para receber notificacoes externas.
 
 ## Telas
 
-- `/`: landing page com proposta do produto e fluxo tecnico.
-- `/pricing`: planos Free, Pro e Business.
+- `/`: landing page compacta do meu case tecnico.
 - `/login`: autenticacao por email e senha.
 - `/register`: criacao de conta com plano Free inicial.
-- `/dashboard`: visao geral da assinatura e ultimo pagamento.
-- `/dashboard/billing`: plano atual, status e historico de pagamentos.
+- `/dashboard`: planos, checkout, assinatura atual e ultimo pagamento.
+- `/checkout/success`, `/checkout/pending` e `/checkout/failure`: retornos do
+  Mercado Pago que redirecionam para o dashboard com uma mensagem clara.
 
 ## Cuidados de seguranca
 
@@ -271,9 +313,18 @@ https://sua-url-publica/api/webhooks/mercadopago
 - Sessao usa cookie httpOnly com JWT assinado.
 - APIs validam entrada com Zod.
 - Access Token do Mercado Pago fica apenas no backend.
-- Webhook exige assinatura valida.
-- Evento duplicado nao reprocessa a mesma notificacao.
+- Webhook exige assinatura valida e timestamp recente.
+- Evento duplicado nao reprocessa a mesma notificacao por provider + chave externa.
+- Pagamento aprovado so ativa assinatura se metadata, valor, moeda e referencia local forem consistentes.
+- Payload salvo em `Payment.rawPayload` e sanitizado para evitar dados pessoais desnecessarios.
 - A assinatura so e ativada apos consulta server-side ao pagamento oficial.
+
+## Limitacoes conhecidas da demo
+
+- Nao e uma implementacao completa de cobranca recorrente nativa.
+- A assinatura e controlada internamente apos pagamento aprovado.
+- Ngrok e apenas para desenvolvimento local.
+- Um ambiente de producao exigiria dominio HTTPS fixo e banco gerenciado.
 
 ## Padrao de commits e hooks
 
