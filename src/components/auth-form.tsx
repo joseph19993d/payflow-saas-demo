@@ -71,7 +71,7 @@ export function AuthForm({ mode, nextPath }: AuthFormProps) {
               minLength={2}
               autoComplete="name"
               className="h-full min-w-0 flex-1 border-0 bg-transparent text-[var(--payflow-text-primary)] outline-none placeholder:text-[var(--payflow-text-disabled)]"
-              placeholder="Seu nome completo"
+              placeholder="Nome para teste"
             />
           </span>
         </label>
@@ -91,7 +91,7 @@ export function AuthForm({ mode, nextPath }: AuthFormProps) {
             type="email"
             autoComplete="email"
             className="h-full min-w-0 flex-1 border-0 bg-transparent text-[var(--payflow-text-primary)] outline-none placeholder:text-[var(--payflow-text-disabled)]"
-            placeholder="voce@email.com"
+            placeholder="usuario@exemplo.com"
           />
         </span>
       </label>
@@ -111,7 +111,7 @@ export function AuthForm({ mode, nextPath }: AuthFormProps) {
             minLength={isRegister ? 8 : 1}
             autoComplete={isRegister ? "new-password" : "current-password"}
             className="h-full min-w-0 flex-1 border-0 bg-transparent text-[var(--payflow-text-primary)] outline-none placeholder:text-[var(--payflow-text-disabled)]"
-            placeholder={isRegister ? "Mínimo de 8 caracteres" : "Sua senha"}
+            placeholder={isRegister ? "Mínimo de 8 caracteres" : "Digite sua senha"}
           />
           <button
             type="button"
