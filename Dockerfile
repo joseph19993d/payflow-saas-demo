@@ -33,7 +33,6 @@ WORKDIR /app
 ENV NODE_ENV=production
 ENV PORT=3000
 ENV HOSTNAME=0.0.0.0
-
 # Usuario no-root
 RUN addgroup --system --gid 1001 nodejs \
     && adduser --system --uid 1001 nextjs
@@ -45,22 +44,25 @@ COPY --from=deps /app/node_modules ./node_modules
 COPY --from=builder /app/package.json ./package.json
 COPY --from=builder /app/package-lock.json ./package-lock.json
 
-# Prisma
-COPY --from=builder /app/prisma ./prisma
+# Next.js
+COPY --from=builder /app/.next ./.next
 
 # Archivos públicos
 COPY --from=builder /app/public ./public
 
-# Aplicación Next.js
-COPY --from=builder /app/.next ./.next
-
-# Configuración necesaria en runtime
-COPY --from=builder /app/next.config.ts ./next.config.ts
-
 # Código fuente
 COPY --from=builder /app/src ./src
 
-# Otros archivos del proyecto que puedan ser necesarios
+# Prisma completo
+COPY --from=builder /app/prisma ./prisma
+
+# Configuración de Prisma
+COPY --from=builder /app/prisma.config.ts ./prisma.config.ts
+
+# Configuración de Next
+COPY --from=builder /app/next.config.ts ./next.config.ts
+
+# TypeScript
 COPY --from=builder /app/tsconfig.json ./tsconfig.json
 
 RUN chown -R nextjs:nodejs /app
