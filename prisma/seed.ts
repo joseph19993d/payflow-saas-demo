@@ -1,6 +1,7 @@
 import "dotenv/config";
 
 import { PrismaPg } from "@prisma/adapter-pg";
+import bcrypt from "bcryptjs";
 
 import { PrismaClient } from "../src/generated/prisma/client";
 
@@ -18,35 +19,37 @@ const plans = [
   {
     slug: "free",
     name: "Free",
-    description: "Para validar o produto com recursos essenciais.",
+    description: "Para validar el producto con recursos esenciales.",
     priceCents: 0,
     sortOrder: 1,
-    features: ["1 workspace", "100 eventos por mes", "Dashboard basico"],
+    features: ["1 espacio de trabajo", "100 eventos por mes", "Panel básico"],
   },
+
   {
     slug: "pro",
     name: "Pro",
-    description: "Para times pequenos que precisam automatizar billing.",
+    description: "Para equipos pequeños que necesitan automatizar la facturación.",
     priceCents: 4900,
     sortOrder: 2,
     features: [
-      "5 workspaces",
+      "5 espacios de trabajo",
       "10.000 eventos por mes",
-      "Webhooks auditaveis",
-      "Suporte por email",
+      "Webhooks auditables",
+      "Soporte por correo electrónico",
     ],
   },
+
   {
     slug: "business",
     name: "Business",
-    description: "Para operacoes com maior volume e rastreabilidade.",
+    description: "Para operaciones con mayor volumen y trazabilidad.",
     priceCents: 14900,
     sortOrder: 3,
     features: [
-      "Workspaces ilimitados",
+      "Espacios de trabajo ilimitados",
       "Eventos ilimitados",
-      "Relatorios financeiros",
-      "Suporte prioritario",
+      "Informes financieros",
+      "Soporte prioritario",
     ],
   },
 ];
@@ -58,6 +61,29 @@ async function main() {
       update: plan,
       create: plan,
     });
+  }
+
+  const adminName = process.env.ADMIN_SEED_NAME;
+  const adminEmail = process.env.ADMIN_SEED_EMAIL;
+  const adminPassword = process.env.ADMIN_SEED_PASSWORD;
+
+  if (adminName && adminEmail && adminPassword) {
+    const passwordHash = await bcrypt.hash(adminPassword, 12);
+    await prisma.user.upsert({
+      where: { email: adminEmail },
+      update: {
+        name: adminName,
+        passwordHash,
+        role: "ADMIN",
+      },
+      create: {
+        name: adminName,
+        email: adminEmail,
+        passwordHash,
+        role: "ADMIN",
+      },
+    });
+    console.log(`Admin user ${adminEmail} seeded successfully.`);
   }
 }
 
